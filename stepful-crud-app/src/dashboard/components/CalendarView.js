@@ -102,6 +102,12 @@ export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
 
     if (isOverlapping) return alert("⛔ Overlapping with existing slot");
 
+    // ⏰ Prevent ending past 9 PM (21:00)
+    const slotMaxTime = dayjs(startTime).hour(21).minute(0).second(0);
+    if (dayjs(endTime).isAfter(slotMaxTime)) {
+      return alert("⛔ Slot must end before 9:00 PM");
+    }
+
     setCreatingSlot({ open: true, slot: { start: startTime, end: endTime } });
   };
 
@@ -147,7 +153,7 @@ export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
         weekends={false} // Hide weekends
         allDaySlot={false}
         slotMinTime="09:00:00"
-        slotMaxTime="22:00:00"
+        slotMaxTime="21:00:00"
       />
 
       {/* Booking Dialog */}
