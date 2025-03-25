@@ -20,7 +20,7 @@ https://github.com/GU9797/stepful-crud-app
 
 - Slot cancellation  
 - Only being able to set student satisfaction/notes after the call  
-- Filtering upcoming/available slots  
+- Filtering upcoming vs available slots  
 - A separate view of upcoming slots outside of calendar  
 - User creation/authentication  
 - DB constraints on overlapping slots  
