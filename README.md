@@ -1,6 +1,7 @@
 # stepful-crud-app
 
 Stepful CRUD App
+https://github.com/GU9797/stepful-crud-app
 
 ---
 
@@ -11,6 +12,7 @@ Stepful CRUD App
 - Holidays are fair game  
 - Students cannot book past or overlapping slots  
 - Coaches cannot create overlapping slots  
+- Overlapping slots with other students will not be displayed to students
 
 ---
 
@@ -19,7 +21,7 @@ Stepful CRUD App
 - Slot cancellation  
 - Only being able to set student satisfaction/notes after the call  
 - Filtering upcoming/available slots  
-- Upcoming slots separate view outside of calendar  
+- A separate view of upcoming slots outside of calendar  
 - User creation/authentication  
 - DB constraints on overlapping slots  
 
@@ -30,3 +32,7 @@ Stepful CRUD App
 - Used theme from [Material Dashboard 2 React](https://www.creative-tim.com/product/material-dashboard-react)  
 - Utilized in `src/assets/theme` and `public/index.html`  
 
+## Tech Stack
+- Backend - Flask
+- Frontend - React
+- DB - Postgres
