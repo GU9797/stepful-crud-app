@@ -55,7 +55,7 @@ export default function BookingDetailsDialog({
             {dayjs(slot.end).format("hh:mm A")}
           </Typography>
 
-          {/* ☎️ Shared phone number */}
+          {/* Shared phone number */}
           <Typography color="grey" sx={{ mt: 2 }}>
             {personName?.split(" ")[0]}'s phone number:
           </Typography>
@@ -63,7 +63,7 @@ export default function BookingDetailsDialog({
             {personPhone}
           </Typography>
 
-          {/* 🧑‍🏫 Coach-only: Satisfaction rating + notes */}
+          {/* Coach-only: Satisfaction rating + notes */}
           {isCoach && (
             <>
               {/* 🔢 Rating Dropdown */}
