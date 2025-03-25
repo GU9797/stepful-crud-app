@@ -1,5 +1,10 @@
 import { Autocomplete, TextField, Box } from "@mui/material";
 
+/**
+ * PersonSelectors
+ * Renders student and/or coach dropdowns based on props.
+ * Used to select users for calendar interaction.
+ */
 export default function PersonSelectors({
   students,
   coaches,
@@ -9,7 +14,10 @@ export default function PersonSelectors({
   setSelectedCoach,
 }) {
   return (
+    // Container for dropdowns
     <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+      
+      {/* Student dropdown - only shown if students prop is passed */}
       {students && (
         <Autocomplete
           disablePortal
@@ -21,6 +29,8 @@ export default function PersonSelectors({
           renderInput={(params) => <TextField {...params} label="Select Student" />}
         />
       )}
+
+      {/* Coach dropdown - always shown if coaches prop is passed */}
       {coaches && (
         <Autocomplete
           disablePortal

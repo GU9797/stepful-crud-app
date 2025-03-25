@@ -17,26 +17,41 @@ import {
 
 import BookingDetailsDialog from "dashboard/components/BookingDetailsDialog";
 
+/**
+ * CalendarView
+ * Displays a calendar interface for booking and managing availability slots.
+ * Adjusts behavior based on the current mode ("student" or "coach").
+ */
 export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
+  // Calendar state
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Dialog state
   const [bookingDialog, setBookingDialog] = useState({ open: false, slot: null });
   const [viewDialog, setViewDialog] = useState({ open: false, slot: null });
-  const [feedback, setFeedback] = useState({ rating: "", notes: "" });
   const [creatingSlot, setCreatingSlot] = useState({ open: false, slot: null });
 
+  // Feedback state (used by coaches)
+  const [feedback, setFeedback] = useState({ rating: "", notes: "" });
+
+  /**
+   * Fetch slots from the backend based on current coach and student selections.
+   * Filters, transforms, and colors slots depending on booking status and mode.
+   */
   const fetchSlots = () => {
     if (!selectedStudent?.id && !selectedCoach?.id) {
-        setEvents([]);
-        return;
-      }
-      
+      setEvents([]);
+      return;
+    }
+
     const params = {};
     if (selectedCoach?.id) params.coach_id = selectedCoach.id;
     if (selectedStudent?.id) params.student_id = selectedStudent.id;
 
     setLoading(true);
-    axios.get("http://localhost:5000/slots", { params })
+    axios
+      .get("http://localhost:5000/slots", { params })
       .then(res => {
         const formatted = res.data.map(slot => ({
           id: slot.id,
@@ -54,33 +69,28 @@ export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
       .finally(() => setLoading(false));
   };
 
+  // Refetch slots whenever selection changes
   useEffect(() => {
     fetchSlots();
   }, [selectedCoach, selectedStudent]);
 
+  /**
+   * Handle clicking on a calendar event.
+   * Book or view slot depending on mode and booking status.
+   */
   const handleEventClick = (info) => {
     const slot = info.event;
     const { isBooked } = slot.extendedProps;
-  
+
     if (isBooked) {
       if (mode === "student") {
-        // Show read-only dialog with coach phone number
-        setViewDialog({
-          open: true,
-          slot,
-          role: "student",  // Add role so dialog knows what to show
-        });
+        setViewDialog({ open: true, slot, role: "student" });
       } else if (mode === "coach") {
-        // Show editable feedback dialog for coach
         setFeedback({
           rating: slot.extendedProps.rating || "",
           notes: slot.extendedProps.notes || "",
         });
-        setViewDialog({
-          open: true,
-          slot,
-          role: "coach",
-        });
+        setViewDialog({ open: true, slot, role: "coach" });
       }
     } else if (mode === "student") {
       if (!selectedStudent) return alert("Select a student first.");
@@ -88,40 +98,50 @@ export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
     }
   };
 
+  /**
+   * Handle clicking on a date cell to create a new availability slot.
+   * Checks for overlapping or invalid slots.
+   */
   const handleDateClick = (arg) => {
     if (!selectedCoach) return alert("Please select a coach first.");
 
     const startTime = arg.date;
     const endTime = dayjs(startTime).add(2, "hour").toDate();
 
+    // Disallow overlapping with other slots
     const isOverlapping = events.some((event) => {
       const eventStart = new Date(event.start);
       const eventEnd = new Date(event.end);
       return startTime < eventEnd && endTime > eventStart;
     });
+    if (isOverlapping) return alert("Overlapping with existing slot");
 
-    if (isOverlapping) return alert("⛔ Overlapping with existing slot");
-
-    // ⏰ Prevent ending past 9 PM (21:00)
+    // Disallow slots that run past 9 PM
     const slotMaxTime = dayjs(startTime).hour(21).minute(0).second(0);
     if (dayjs(endTime).isAfter(slotMaxTime)) {
-      return alert("⛔ Slot must end before 9:00 PM");
+      return alert("Slot must end before 9:00 PM");
     }
 
     setCreatingSlot({ open: true, slot: { start: startTime, end: endTime } });
   };
 
+  /**
+   * Book a slot by assigning it to the selected student.
+   */
   const handleBookSlot = () => {
     axios.put(`http://localhost:5000/slots/book/${bookingDialog.slot.id}`, {
       student_id: selectedStudent.id,
     })
-      .then(() => {
-        setBookingDialog({ open: false, slot: null});
-        fetchSlots();
-      })
-      .catch(() => alert("Failed to book slot."));
+    .then(() => {
+      setBookingDialog({ open: false, slot: null });
+      fetchSlots();
+    })
+    .catch(() => alert("Failed to book slot."));
   };
 
+  /**
+   * Create a new availability slot for the selected coach.
+   */
   const handleCreateSlot = () => {
     const { start, end } = creatingSlot.slot;
     axios.post("http://localhost:5000/slots/add", {
@@ -130,18 +150,20 @@ export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
       time_start: dayjs(start).format("HH:mm:ss"),
       time_end: dayjs(end).format("HH:mm:ss"),
     })
-      .then(() => {
-        setCreatingSlot({ open: false, slot: null });
-        fetchSlots();
-      })
-      .catch((err) => {
-        console.error("Create slot error", err);
-      });
+    .then(() => {
+      setCreatingSlot({ open: false, slot: null });
+      fetchSlots();
+    })
+    .catch((err) => {
+      console.error("Create slot error", err);
+    });
   };
 
   return (
     <>
       {loading && <CircularProgress />}
+
+      {/* Calendar */}
       <FullCalendar
         plugins={[timeGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"
@@ -150,13 +172,13 @@ export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
         eventClick={handleEventClick}
         events={events}
         height="auto"
-        weekends={false} // Hide weekends
+        weekends={false}
         allDaySlot={false}
         slotMinTime="09:00:00"
         slotMaxTime="21:00:00"
       />
 
-      {/* Booking Dialog */}
+      {/* Student Booking Confirmation Dialog */}
       <Dialog open={bookingDialog.open} onClose={() => setBookingDialog({ open: false, slot: null })}>
         <DialogTitle>Confirm Booking with {selectedCoach?.name}</DialogTitle>
         <DialogContent>
@@ -165,29 +187,29 @@ export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setBookingDialog({ open: false, slot: null })} color="black">Cancel</Button>
-          <Button onClick={handleBookSlot} variant="contained" color="white" sx={{ color: "blue" }}>Confirm</Button>
+          <Button onClick={() => setBookingDialog({ open: false, slot: null })}>Cancel</Button>
+          <Button onClick={handleBookSlot} variant="contained" sx={{ color: "blue" }}>Confirm</Button>
         </DialogActions>
       </Dialog>
 
-      {/* Slot Creation Dialog */}
+      {/* Coach Slot Creation Dialog */}
       <Dialog open={creatingSlot.open} onClose={() => setCreatingSlot({ open: false, slot: null })}>
         <DialogTitle>Create Availability Slot</DialogTitle>
         <DialogContent>
           <Typography>
-          Create 2-hour slot on:
+            Create 2-hour slot on:
           </Typography>
           <Typography variant="subtitle1" sx={{ mt: 1 }} color="grey">
-          {dayjs(creatingSlot.slot?.start).format("YYYY-MM-DD")}, from {dayjs(creatingSlot.slot?.start).format("hh:mm A")} to {dayjs(creatingSlot.slot?.end).format("hh:mm A")}?
+            {dayjs(creatingSlot.slot?.start).format("YYYY-MM-DD")}, from {dayjs(creatingSlot.slot?.start).format("hh:mm A")} to {dayjs(creatingSlot.slot?.end).format("hh:mm A")}?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreatingSlot({ open: false, slot: null })} color="black" >Cancel</Button>
-          <Button onClick={handleCreateSlot} variant="contained" color="white" sx={{ color: "blue" }}>Create</Button>
+          <Button onClick={() => setCreatingSlot({ open: false, slot: null })}>Cancel</Button>
+          <Button onClick={handleCreateSlot} variant="contained" sx={{ color: "blue" }}>Create</Button>
         </DialogActions>
       </Dialog>
 
-      {/* Booking Details Dialog */}
+      {/* Shared Booking Details Dialog (coach and student) */}
       <BookingDetailsDialog
         open={viewDialog.open}
         onClose={() => setViewDialog({ ...viewDialog, open: false })}
@@ -196,23 +218,22 @@ export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
         feedback={feedback}
         setFeedback={setFeedback}
         onSubmitFeedback={() => {
-            axios
-            .post(`http://localhost:5000/slots/feedback/${viewDialog.slot.id}`, {
-                rating: feedback.rating,
-                notes: feedback.notes,
-            })
-            .then(() => {
-                alert("✅ Feedback submitted!");
-                setFeedback({ rating: "", notes: "" });
-                fetchSlots(null, viewDialog.slot.extendedProps.coachId);
-                setViewDialog({ ...viewDialog, open: false });
-            })
-            .catch((err) => {
-                console.error("Error submitting feedback:", err);
-                alert("❌ Failed to submit feedback.");
-            });
+          axios.post(`http://localhost:5000/slots/feedback/${viewDialog.slot.id}`, {
+            rating: feedback.rating,
+            notes: feedback.notes,
+          })
+          .then(() => {
+            alert("Feedback submitted!");
+            setFeedback({ rating: "", notes: "" });
+            fetchSlots();
+            setViewDialog({ ...viewDialog, open: false });
+          })
+          .catch((err) => {
+            console.error("Error submitting feedback:", err);
+            alert("Failed to submit feedback.");
+          });
         }}
-    />
+      />
     </>
   );
 }

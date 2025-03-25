@@ -10,13 +10,22 @@ import axios from "axios";
 import PersonSelectors from "dashboard/components/PersonSelectors";
 import CalendarView from "dashboard/components/CalendarView";
 
+/**
+ * Dashboard
+ * Main entry point for coach and student views.
+ * Includes person selection dropdowns and calendar scheduler.
+ */
 export default function Dashboard() {
+  // State for selected person and mode (coach or student)
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedCoach, setSelectedCoach] = useState(null);
   const [mode, setMode] = useState("coach");
+
+  // Data storage for fetched person lists
   const [students, setStudents] = useState([]);
   const [coaches, setCoaches] = useState([]);
 
+  // Fetch all persons once on mount and categorize by role
   useEffect(() => {
     axios.get("http://localhost:5000/persons")
       .then((res) => {
@@ -26,20 +35,22 @@ export default function Dashboard() {
       .catch((err) => console.error("Error fetching persons:", err));
   }, []);
 
+  // Reset selected persons when switching modes
   useEffect(() => {
     setSelectedStudent(null);
     setSelectedCoach(null);
   }, [mode]);
 
+  // Toggle between coach and student mode
   const handleModeChange = (event, newMode) => {
     if (newMode) {
-    setMode(newMode);
+      setMode(newMode);
     }
   };
 
   return (
     <Box sx={{ p: 6 }}>
-      {/* Header bar */}
+      {/* Header with title and mode switch */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Typography variant="h5">Coaching Scheduler</Typography>
         <ToggleButtonGroup
@@ -54,7 +65,7 @@ export default function Dashboard() {
         </ToggleButtonGroup>
       </Box>
 
-      {/* Person selection */}
+      {/* Dropdown selectors for student and coach */}
       <PersonSelectors
         students={mode === "student" ? students : null}
         coaches={coaches}
@@ -64,7 +75,7 @@ export default function Dashboard() {
         setSelectedCoach={setSelectedCoach}
       />
 
-      {/* Calendar */}
+      {/* Calendar rendering based on selected mode/persons */}
       <Box sx={{ px: 2 }}>
         <CalendarView
           mode={mode}

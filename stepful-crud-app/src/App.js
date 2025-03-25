@@ -1,22 +1,26 @@
 import { useEffect } from "react";
 
-// react-router components
+// React Router components
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
-// @mui material components
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+// MUI components
+import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
-// Material Dashboard 2 React Dark Mode themes
+// Custom theme
 import theme from "assets/theme";
 
+// App views
 import Dashboard from "dashboard";
 
-
+/**
+ * App
+ * Root component that sets up routing and theming.
+ */
 export default function App() {
   const { pathname } = useLocation();
-  
-  // Setting page scroll to 0 when changing the route
+
+  // Scroll to top when navigating to a new route
   useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
@@ -24,12 +28,13 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
+      {/* Normalize baseline styles */}
       <CssBaseline />
-        <>
-        </>
+
+      {/* Define application routes */}
       <Routes>
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </ThemeProvider>
   );
