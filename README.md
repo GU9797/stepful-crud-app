@@ -24,6 +24,8 @@ https://github.com/GU9797/stepful-crud-app
 - A separate view of upcoming slots outside of calendar  
 - User creation/authentication  
 - DB constraints on overlapping slots  
+- Bulk slot creation/booking
+- Date selection
 
 ---
 
@@ -32,7 +34,9 @@ https://github.com/GU9797/stepful-crud-app
 - Used theme from [Material Dashboard 2 React](https://www.creative-tim.com/product/material-dashboard-react)  
 - Utilized in `src/assets/theme` and `public/index.html`  
 
+---
+
 ## Tech Stack
-- Backend - Flask
-- Frontend - React
-- DB - Postgres
+- Backend:Flask
+- Frontend: React
+- DB: Postgres
