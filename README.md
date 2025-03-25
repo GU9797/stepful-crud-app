@@ -28,5 +28,5 @@ Stepful CRUD App
 ## Themes
 
 - Used theme from [Material Dashboard 2 React](https://www.creative-tim.com/product/material-dashboard-react)  
-- Customization done in `src/assets/theme` and `public/index.html`  
+- Utilized in `src/assets/theme` and `public/index.html`  
 
