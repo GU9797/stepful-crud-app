@@ -8,10 +8,13 @@ import { Autocomplete, TextField, Box } from "@mui/material";
 export default function PersonSelectors({
   students,
   coaches,
+  slotTypes,
   selectedStudent,
   setSelectedStudent,
   selectedCoach,
   setSelectedCoach,
+  slotType,
+  setSlotType,
 }) {
   return (
     // Container for dropdowns
@@ -31,7 +34,6 @@ export default function PersonSelectors({
       )}
 
       {/* Coach dropdown - always shown if coaches prop is passed */}
-      {coaches && (
         <Autocomplete
           disablePortal
           value={selectedCoach}
@@ -41,7 +43,17 @@ export default function PersonSelectors({
           onChange={(event, newValue) => setSelectedCoach(newValue)}
           renderInput={(params) => <TextField {...params} label="Select Coach" />}
         />
-      )}
+
+      {/* Slot type dropdown - always shown if coaches prop is passed */}
+      <Autocomplete
+          disablePortal
+          value={slotType}
+          options={slotTypes}
+          sx={{ width: 300 }}
+          onChange={(event, newValue) => setSlotType(newValue)}
+          renderInput={(params) => <TextField {...params} label="Select Slot Type" />}
+        />
+
     </Box>
   );
 }

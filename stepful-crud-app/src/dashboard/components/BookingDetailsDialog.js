@@ -24,6 +24,7 @@ export default function BookingDetailsDialog({
   feedback,
   setFeedback,
   onSubmitFeedback,
+  onCancel,
 }) {
   // Don't render anything if no slot is passed
   if (!slot) return null;
@@ -107,6 +108,14 @@ export default function BookingDetailsDialog({
       {/* Action Buttons */}
       <DialogActions>
         <Button onClick={onClose}>Close</Button>
+        <Button
+            variant="contained"
+            onClick={onCancel}
+            color="white"
+            sx={{ color: "blue" }}
+          >
+            Cancel Booking
+          </Button>
         {isCoach && (
           <Button
             variant="contained"

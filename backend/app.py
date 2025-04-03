@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from models import db, Person, Slot
 from datetime import datetime, date
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 # === Initialize Flask App ===
 app = Flask(__name__)
@@ -17,12 +17,12 @@ app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
 db.init_app(app)
 
 # === Helper Function ===
-def filter_overlapping_slots(slots):
+def filter_overlapping_slots(coach_id, slots):
     """
     Filters out available slots that overlap with any globally booked slots.
     Returns a list of valid (non-overlapping) available + booked slots.
     """
-    all_booked_slots = Slot.query.filter(Slot.booked_by != None).all()
+    all_booked_slots = Slot.query.filter(and_(Slot.booked_by != None, Slot.coach_id == coach_id)).all()
 
     booked_slots = [slot for slot in slots if slot.booked_by]
     available_slots = [slot for slot in slots if not slot.booked_by]
@@ -95,7 +95,7 @@ def get_slots():
 
     # For students: remove any available slots that conflict with booked ones
     if student_id:
-        slots = filter_overlapping_slots(slots)
+        slots = filter_overlapping_slots(coach_id, slots)
 
     # Format response
     result = []
@@ -128,6 +128,18 @@ def book_slot(slot_id):
         slot.booked_by = data["student_id"]
         db.session.commit()
         return jsonify({"message": "Slot booked"})
+    return jsonify({"error": "Slot unavailable"}), 400
+
+# Students cancel a slot
+@app.route("/slots/cancel/<int:slot_id>", methods=["DELETE"])
+def cancel_slot(slot_id):
+    print('slot', slot_id)
+    data = request.json
+    slot = Slot.query.get(slot_id)
+    if slot:
+        db.session.delete(slot)
+        db.session.commit()
+        return jsonify({"message": "Slot deleted"})
     return jsonify({"error": "Slot unavailable"}), 400
 
 # Coaches submit feedback after a session

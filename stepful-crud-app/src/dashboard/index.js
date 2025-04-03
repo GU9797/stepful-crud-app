@@ -19,11 +19,14 @@ export default function Dashboard() {
   // State for selected person and mode (coach or student)
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedCoach, setSelectedCoach] = useState(null);
+  const [slotType, setSlotType] = useState(null);
+
   const [mode, setMode] = useState("coach");
 
   // Data storage for fetched person lists
   const [students, setStudents] = useState([]);
   const [coaches, setCoaches] = useState([]);
+  const [slotTypes, setSlotTypes] = useState(["all", "available", "booked"]);
 
   // Fetch all persons once on mount and categorize by role
   useEffect(() => {
@@ -39,6 +42,7 @@ export default function Dashboard() {
   useEffect(() => {
     setSelectedStudent(null);
     setSelectedCoach(null);
+    setSlotType(null);
   }, [mode]);
 
   // Toggle between coach and student mode
@@ -69,10 +73,13 @@ export default function Dashboard() {
       <PersonSelectors
         students={mode === "student" ? students : null}
         coaches={coaches}
+        slotTypes={slotTypes}
         selectedStudent={selectedStudent}
         setSelectedStudent={setSelectedStudent}
         selectedCoach={selectedCoach}
         setSelectedCoach={setSelectedCoach}
+        slotType={slotType}
+        setSlotType={setSlotType}
       />
 
       {/* Calendar rendering based on selected mode/persons */}

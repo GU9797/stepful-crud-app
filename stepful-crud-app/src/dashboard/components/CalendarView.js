@@ -159,6 +159,19 @@ export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
     });
   };
 
+  const handleCancel = () => {
+    axios.delete(`http://localhost:5000/slots/cancel/${viewDialog.slot.id}`, {
+      data: { coach_id: selectedCoach.id }, // `data` must be used with DELETE requests
+    })
+    .then(() => {
+      setViewDialog({ open: false, slot: null });
+      fetchSlots();
+    })
+    .catch((err) => {
+      console.error("Create slot error", err);
+    });
+  };
+
   return (
     <>
       {loading && <CircularProgress />}
@@ -218,6 +231,7 @@ export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
         feedback={feedback}
         setFeedback={setFeedback}
         onSubmitFeedback={() => {
+          // if (dayjs day before today) return alert("Cannot submit feedback until after call.");
           axios.post(`http://localhost:5000/slots/feedback/${viewDialog.slot.id}`, {
             rating: feedback.rating,
             notes: feedback.notes,
@@ -231,8 +245,9 @@ export default function CalendarView({ mode, selectedCoach, selectedStudent }) {
           .catch((err) => {
             console.error("Error submitting feedback:", err);
             alert("Failed to submit feedback.");
-          });
+          })
         }}
+        onCancel={handleCancel}
       />
     </>
   );
