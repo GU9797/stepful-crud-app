@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from models import db, Person, Slot
 from datetime import datetime, date
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 # === Initialize Flask App ===
 app = Flask(__name__)
