@@ -17,12 +17,18 @@ app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
 db.init_app(app)
 
 # === Helper Function ===
-def filter_overlapping_slots(coach_id, slots):
+def filter_overlapping_slots(coach_id, student_id, slots):
     """
     Filters out available slots that overlap with any globally booked slots.
     Returns a list of valid (non-overlapping) available + booked slots.
     """
-    all_booked_slots = Slot.query.filter(and_(Slot.booked_by != None, Slot.coach_id == coach_id)).all()
+    all_booked_slots = Slot.query.filter(
+        or_(
+            Slot.coach_id == coach_id,
+            Slot.booked_by == student_id
+        ),
+        Slot.booked_by != None  # Ensures it's actually booked
+    ).all()
 
     booked_slots = [slot for slot in slots if slot.booked_by]
     available_slots = [slot for slot in slots if not slot.booked_by]
@@ -95,7 +101,7 @@ def get_slots():
 
     # For students: remove any available slots that conflict with booked ones
     if student_id:
-        slots = filter_overlapping_slots(coach_id, slots)
+        slots = filter_overlapping_slots(coach_id, student_id, slots)
 
     # Format response
     result = []
